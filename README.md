@@ -2,7 +2,7 @@
 Background window recorder
 
 Installation:
-`pip install window-recorder`
+`pip install python-window-recorder`
 
 ```
 from window-recorder import Recorder
