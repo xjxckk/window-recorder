@@ -1,11 +1,10 @@
 
-from DXcam import Recording
+from window-recorder import Recorder
 from time import sleep
 
-recording = Recording('Startpage - Google Chrome')
+recorder = Recorder('Startpage - Google Chrome')
 print('Starting')
-recording.start(filename='test')
+recorder.start(filename='test')
 sleep(3)
 print('Stopping')
-recording.stop()
-# sleep(3)
+recorder.stop()
