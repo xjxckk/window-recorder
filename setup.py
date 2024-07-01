@@ -1,10 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = 'python-window-recorder',
-    packages = ['window_recorder'],
+    packages=find_packages(),
     install_requires=['opencv-python', 'pywin32'],
-    version = '0.1',
+    version = '0.3',
     description = 'Background window recorder',
     url = 'https://github.com/xjxckk/window-recorder/',
     long_description=open('README.md').read(),
