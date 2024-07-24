@@ -7,7 +7,7 @@ import win32gui
 from window_recorder.capture.d3dcapture import CaptureSession
 
 class Recorder():
-    def __init__(recorder, window_title):
+    def __init__(recorder, window_title, timeout=120):
         recorder.hwnd = recorder.get_hwnd(window_title)
         session = CaptureSession()
         recorder.state_box = [None, False, False] # frame, changed, stop
@@ -20,6 +20,7 @@ class Recorder():
             recorder.state_box[1] = True
         session.frame_callback = frame_callback
         recorder.session = session
+        recorder.timeout = timeout
     
     def start(recorder, folder=None, filename=None):
         # Get the current timestamp for the filename
@@ -55,12 +56,18 @@ class Recorder():
         recorder.session.start(hwnd, False)
 
         recorder.stop_flag = False
+        recorder.timeout_at = time.time() + recorder.timeout
         def start_recorder(recorder):
             while not recorder.stop_flag:
                 if recorder.state_box[1]:
                     recorder.state_box[1] = False
                     img = recorder.state_box[0]
                     recorder.video_ouput.write(img)
+                if time.time() >= recorder.timeout_at:
+                    recorder.video_ouput.release()
+                    recorder.session.stop()
+                    print(f'Video saved as {recorder.output_file_path} after timing out')
+                    break
 
         recorder.thread = Thread(target=start_recorder, args=(recorder,), daemon=True) # Daemon otherwise won't be able to exit with Ctrl+C
         recorder.thread.start()
