@@ -63,6 +63,7 @@ class Recorder():
                     recorder.state_box[1] = False
                     img = recorder.state_box[0]
                     recorder.video_ouput.write(img)
+                    
                 if time.time() >= recorder.timeout_at:
                     recorder.video_ouput.release()
                     recorder.session.stop()
@@ -95,4 +96,4 @@ class Recorder():
             if window_title.lower() in current_window_title.lower():
                 return current_hwnd
         
-        raise Exception(f'Window title "{window_title}" not found')
+        # raise Exception(f'Window title "{window_title}" not found')
