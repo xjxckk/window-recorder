@@ -96,4 +96,5 @@ class Recorder():
             if window_title.lower() in current_window_title.lower():
                 return current_hwnd
         
+        print(f'Window recorder: Window title "{window_title}" not found, window recorder will not work')
         # raise Exception(f'Window title "{window_title}" not found')
