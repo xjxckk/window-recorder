@@ -14,5 +14,5 @@ recorder.start(folder='recordings', filename='test')
 sleep(3)
 print('Stopping recording')
 recorder.stop()
-> Video saved as test_20240629-190811.mp4
+> Video saved as test_2024-06-29 19-08-11.mp4
 ```

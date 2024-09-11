@@ -8,7 +8,7 @@ from window_recorder.capture.d3dcapture import CaptureSession
 
 class Recorder():
     def __init__(recorder, window_title, timeout=120):
-        recorder.hwnd = recorder.get_hwnd(window_title)
+        recorder.window_handle = recorder.get_window_handle(window_title)
         session = CaptureSession()
         recorder.state_box = [None, False, False] # frame, changed, stop
 
@@ -24,7 +24,7 @@ class Recorder():
     
     def start(recorder, folder=None, filename=None):
         # Get the current timestamp for the filename
-        timestamp = time.strftime('%Y%m%d-%H%M%S')
+        timestamp = time.strftime('%Y-%m-%d %H-%M-%S')
 
         # Define the output filename with the timestamp
         if folder:
@@ -43,17 +43,18 @@ class Recorder():
 
         # Define video codec and create VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        window_rect = win32gui.GetWindowRect(recorder.hwnd)
+        window_rect = win32gui.GetWindowRect(recorder.window_handle)
         width, height = window_rect[2] - window_rect[0], window_rect[3] - window_rect[1]
-        recorder.video_ouput = cv2.VideoWriter(recorder.output_file_path, fourcc, 50, (width, height))
+        recorder.video_output = cv2.VideoWriter(recorder.output_file_path, fourcc, 50, (width, height))
 
         # Check if the VideoWriter object is opened successfully
-        if not recorder.video_ouput.isOpened():
+        if not recorder.video_output.isOpened():
             raise Exception('Failed to open the video writer')
         
         # Start window capture
-        hwnd = recorder.hwnd
-        recorder.session.start(hwnd, False)
+        window_handle = recorder.window_handle
+        recorder.session.start(window_handle, False)
+        print(f'Starting recording as {recorder.output_file_path}')
 
         recorder.stop_flag = False
         recorder.timeout_at = time.time() + recorder.timeout
@@ -62,12 +63,12 @@ class Recorder():
                 if recorder.state_box[1]:
                     recorder.state_box[1] = False
                     img = recorder.state_box[0]
-                    recorder.video_ouput.write(img)
-                    
+                    recorder.video_output.write(img)
+                
                 if time.time() >= recorder.timeout_at:
-                    recorder.video_ouput.release()
-                    recorder.session.stop()
-                    print(f'Video saved as {recorder.output_file_path} after timing out')
+                    print(f'Saving recording as {recorder.output_file_path} after timing out')
+                    recorder.video_output.release()
+                    # recorder.session.stop() # Causes exit
                     break
 
         recorder.thread = Thread(target=start_recorder, args=(recorder,), daemon=True) # Daemon otherwise won't be able to exit with Ctrl+C
@@ -77,24 +78,22 @@ class Recorder():
         recorder.stop_flag = True
         recorder.thread.join()
 
-        recorder.video_ouput.release()
+        recorder.video_output.release()
         recorder.session.stop()
-        print(f'Video saved as {recorder.output_file_path}')
+        print(f'Recording saved as {recorder.output_file_path}')
         return recorder.output_file_path
     
-    def get_hwnd(recorder, window_title):
-        # Get window handle with partial match
-        
-        def callback(hwnd, hwnds):
-            hwnds.append(hwnd)
+    def get_window_handle(recorder, window_title):
+        window_handles = []
+        def callback(window_handle, window_handles):
+            window_handles.append(window_handle)
             return True
             
-        hwnds = []
-        win32gui.EnumWindows(callback, hwnds)
-        for current_hwnd in hwnds:
-            current_window_title = win32gui.GetWindowText(current_hwnd)
-            if window_title.lower() in current_window_title.lower():
-                return current_hwnd
+        win32gui.EnumWindows(callback, window_handles)
+        for current_window_handle in window_handles:
+            current_window_title = win32gui.GetWindowText(current_window_handle)
+            if window_title.lower() in current_window_title.lower(): # Get window handle with partial match
+                return current_window_handle
         
         print(f'Window recorder: Window title "{window_title}" not found, window recorder will not work')
         # raise Exception(f'Window title "{window_title}" not found')
