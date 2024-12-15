@@ -35,14 +35,14 @@ class Recorder():
         else:
             folder_path = ''
         if filename:
-            full_filename = f'{filename}_{timestamp}.mp4'
+            full_filename = f'{filename}_{timestamp}.mkv'
         else:
-            full_filename = timestamp + '.mp4'
+            full_filename = timestamp + '.mkv'
         recorder.output_file_path = folder_path + full_filename
         # print('recorder.output_file_path', recorder.output_file_path)
 
         # Define video codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         window_rect = win32gui.GetWindowRect(recorder.window_handle)
         width, height = window_rect[2] - window_rect[0], window_rect[3] - window_rect[1]
         recorder.video_output = cv2.VideoWriter(recorder.output_file_path, fourcc, 50, (width, height))
@@ -73,6 +73,8 @@ class Recorder():
 
         recorder.thread = Thread(target=start_recorder, args=(recorder,), daemon=True) # Daemon otherwise won't be able to exit with Ctrl+C
         recorder.thread.start()
+        
+        return recorder.output_file_path
     
     def stop(recorder):
         recorder.stop_flag = True
