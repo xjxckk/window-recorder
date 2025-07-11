@@ -1,10 +1,12 @@
 
-import time, os
+import time, os, sys
 import cv2
 from threading import Thread
 import ctypes
-import win32gui
-from window_recorder.capture.d3dcapture import CaptureSession
+
+if sys.platform != 'linux':
+    import win32gui
+    from window_recorder.capture.d3dcapture import CaptureSession
 
 class Recorder():
     def __init__(recorder, window_title, timeout=120):
@@ -94,7 +96,7 @@ class Recorder():
         win32gui.EnumWindows(callback, window_handles)
         for current_window_handle in window_handles:
             current_window_title = win32gui.GetWindowText(current_window_handle)
-            if window_title.lower() in current_window_title.lower(): # Get window handle with partial match
+            if window_title in current_window_title: # Get window handle with partial match
                 return current_window_handle
         
         print(f'Window recorder: Window title "{window_title}" not found, window recorder will not work')
